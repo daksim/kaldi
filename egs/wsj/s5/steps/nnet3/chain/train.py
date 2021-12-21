@@ -23,6 +23,7 @@ import libs.common as common_lib
 import libs.nnet3.train.chain_objf.acoustic_model as chain_lib
 import libs.nnet3.report.log_parse as nnet3_log_parse
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 logger = logging.getLogger('libs')
 logger.setLevel(logging.INFO)

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Change this location to somewhere where you want to put the data.
-data=./corpus/
+data=$1
 
 data_url=www.openslr.org/resources/31
 lm_url=www.openslr.org/resources/11
@@ -59,14 +59,14 @@ if [ $stage -le 2 ]; then
 
   # Get the shortest 500 utterances first because those are more likely
   # to have accurate alignments.
-  utils/subset_data_dir.sh --shortest data/train_clean_5 500 data/train_500short
+  # utils/subset_data_dir.sh --shortest data/train_clean_5 500 data/train_500short
 fi
 
 # train a monophone system
 if [ $stage -le 3 ]; then
   # TODO(galv): Is this too many jobs for a smaller dataset?
   steps/train_mono.sh --boost-silence 1.25 --nj 5 --cmd "$train_cmd" \
-    data/train_500short data/lang_nosp exp/mono
+    data/train_clean_5 data/lang_nosp exp/mono
 
   steps/align_si.sh --boost-silence 1.25 --nj 5 --cmd "$train_cmd" \
     data/train_clean_5 data/lang_nosp exp/mono exp/mono_ali_train_clean_5
@@ -141,7 +141,7 @@ fi
 
 # Train a chain model
 if [ $stage -le 9 ]; then
-  local/chain2/run_tdnn.sh
+  local/chain/tuning/run_tdnn_1f.sh
 fi
 
 # local/grammar/simple_demo.sh

@@ -1,75 +1,98 @@
-[![Build Status](https://travis-ci.com/kaldi-asr/kaldi.svg?branch=master)](https://travis-ci.com/kaldi-asr/kaldi)
-[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/kaldi-asr/kaldi) 
-Kaldi Speech Recognition Toolkit
-================================
+# NISP Costumed Kaldi
 
-To build the toolkit: see `./INSTALL`.  These instructions are valid for UNIX
-systems including various flavors of Linux; Darwin; and Cygwin (has not been
-tested on more "exotic" varieties of UNIX).  For Windows installation
-instructions (excluding Cygwin), see `windows/INSTALL`.
+See [here](https://github.com/kaldi-asr/kaldi) for complete information of Kaldi.
 
-To run the example system builds, see `egs/README.txt`
+## Install Kaldi
 
-If you encounter problems (and you probably will), please do not hesitate to
-contact the developers (see below). In addition to specific questions, please
-let us know if there are specific aspects of the project that you feel could be
-improved, that you find confusing, etc., and which missing features you most
-wish it had.
+You can just run `install.sh` in our own server.
 
-Kaldi information channels
---------------------------
+If `install.sh` fails, please install Kaldi yourself through the following steps:
 
-For HOT news about Kaldi see [the project site](http://kaldi-asr.org/).
+- go to `tools/`, run 
 
-[Documentation of Kaldi](http://kaldi-asr.org/doc/):
-- Info about the project, description of techniques, tutorial for C++ coding.
-- Doxygen reference of the C++ code.
+  ```shell
+  extras/check_dependencies.sh
+  make
+  ```
 
-[Kaldi forums and mailing lists](http://kaldi-asr.org/forums.html):
+- go to `src/`, run
 
-We have two different lists
-- User list kaldi-help
-- Developer list kaldi-developers:
+  ```shell
+  ./configure --shared
+  make depend
+  make
+  ```
 
-To sign up to any of those mailing lists, go to
-[http://kaldi-asr.org/forums.html](http://kaldi-asr.org/forums.html):
+## Check installation
 
+Go to `egs/yesno/s5/`, run `run.sh`.
 
-Development pattern for contributors
-------------------------------------
+## Train mini-LibriSpeech Kaldi
 
-1. [Create a personal fork](https://help.github.com/articles/fork-a-repo/)
-   of the [main Kaldi repository](https://github.com/kaldi-asr/kaldi) in GitHub.
-2. Make your changes in a named branch different from `master`, e.g. you create
-   a branch `my-awesome-feature`.
-3. [Generate a pull request](https://help.github.com/articles/creating-a-pull-request/)
-   through the Web interface of GitHub.
-4. As a general rule, please follow [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html).
-   There are a [few exceptions in Kaldi](http://kaldi-asr.org/doc/style.html).
-   You can use the [Google's cpplint.py](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py)
-   to verify that your code is free of basic mistakes.
+Prepare speech [data](https://www.openslr.org/31/) in `path_to_minilibrispeech_audios`, where
 
-Platform specific notes
------------------------
+```
+<path_to_minilibrispeech_audios>
+└── LibriSpeech
+    ├── speakerID
+    │   ├── paragraphID
+    │   │   ├── speakerID-paragraphID-uttranceID.flac
+    │   │   ├── ......
+    │   │   └── speakerID-paragraphID.trans.txt
+    │   └── ......
+    └── ......
+```
 
-### PowerPC 64bits little-endian (ppc64le)
+Go to `egs/mini_librispeech/s5`.
 
-- Kaldi is expected to work out of the box in RHEL >= 7 and Ubuntu >= 16.04 with
-  OpenBLAS, ATLAS, or CUDA.
-- CUDA drivers for ppc64le can be found at [https://developer.nvidia.com/cuda-downloads](https://developer.nvidia.com/cuda-downloads).
-- An [IBM Redbook](https://www.redbooks.ibm.com/abstracts/redp5169.html) is
-  available as a guide to install and configure CUDA.
+Change line 26 of the `steps/nnet3/chain/train.py` to define the serial number of GPUs used.
 
-### Android
+Start training by 
 
-- Kaldi supports cross compiling for Android using Android NDK, clang++ and
-  OpenBLAS.
-- See [this blog post](http://jcsilva.github.io/2017/03/18/compile-kaldi-android/)
-  for details.
+```shell
+./run.sh <path_to_minilibrispeech_audios>
+```
 
-### Web Assembly
+## Test the model
 
-- Kaldi supports cross compiling for Web Assembly for in-browser execution
-  using [emscripten](https://emscripten.org/) and CLAPACK.
-- See [this post](https://gitlab.inria.fr/kaldi.web/kaldi-wasm/-/wikis/build_details.md)
-  for a step-by-step description of the build process.
+Decode an audio file `path_to_test_wav_audio.wav` in `egs/mini_librispeech/s5` by
+
+```shell
+../../../src/online2bin/online2-wav-nnet3-latgen-faster \
+    --do-endpointing=false \
+    --online=false \
+    --config=egs/mini_librispeech/s5/exp/chain/tdnn1f_sp_online/conf/online.conf \
+    --max-active=7000 \
+    --beam=15.0 \
+    --lattice-beam=6.0 \
+    --acoustic-scale=1.0 \
+    --word-symbol-table=egs/mini_librispeech/s5/exp/chain/tree_sp/graph_tgsmall/words.txt \
+    egs/mini_librispeech/s5/exp/chain/tdnn1f_sp/final.mdl \
+    egs/mini_librispeech/s5/exp/chain/tree_sp/graph_tgsmall/HCLG.fst \
+    'ark:echo utter1 utter1|' \
+    'scp:echo utter1 <path_to_test_wav_audio.wav>|' \
+    ark:/dev/null
+```
+
+To get the WER on the dev set of mini-LibriSpeech, run
+
+```shell
+local/chain/compare_wer.sh --online exp/chain/tdnn1f_sp 2>/dev/null
+```
+
+the output is like
+
+```shell
+# local/chain/compare_wer.sh --online exp/chain/tdnn1f_sp
+# System                tdnn1f_sp
+#WER dev_clean_2 (tgsmall)      14.51
+#             [online:]         14.52
+#WER dev_clean_2 (tglarge)      10.59
+#             [online:]         10.60
+# Final train prob        -0.0723
+# Final valid prob        -0.0915
+# Final train prob (xent)   -2.2869
+# Final valid prob (xent)   -2.3976
+# Num-params                 4172512
+```
+
