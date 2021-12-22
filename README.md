@@ -1,4 +1,4 @@
-# NISP Costumed Kaldi
+# NISP Customized Kaldi
 
 See [here](https://github.com/kaldi-asr/kaldi) for complete information of Kaldi.
 
