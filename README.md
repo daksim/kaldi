@@ -53,7 +53,7 @@ Prepare speech [data](https://www.openslr.org/31/) in `path_to_minilibrispeech_a
 └── LibriSpeech
     ├── speakerID
     │   ├── paragraphID
-    │   │   ├── speakerID-paragraphID-uttranceID.flac
+    │   │   ├── speakerID-paragraphID-utteranceID.flac
     │   │   ├── ......
     │   │   └── speakerID-paragraphID.trans.txt
     │   └── ......
