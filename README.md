@@ -2,6 +2,23 @@
 
 See [here](https://github.com/kaldi-asr/kaldi) for complete information of Kaldi.
 
+## Use Nvidia-docker
+
+The image is pushed to [DockerHub](https://hub.docker.com/r/daksimz/nisp-kaldi).
+
+It is recommended to change the path where the docker images are stored before `docker pull`.
+
+- Follow the official [instructions](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker) to install `nvidia-docker`.
+
+- Run image with
+
+  ```shell
+  docker pull daksimz/nisp-kaldi:1.0
+  docker run -it --runtime=nvidia daksimz/nisp-kaldi:1.0 /bin/bash
+  ```
+
+Or you can install Kaldi by yourself.
+
 ## Install Kaldi
 
 You can just run `install.sh` in our own server.
