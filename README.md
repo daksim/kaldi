@@ -46,7 +46,7 @@ Go to `egs/yesno/s5/`, run `run.sh`.
 
 ## Train mini-LibriSpeech Kaldi
 
-Prepare speech [data](https://www.openslr.org/31/) in `path_to_minilibrispeech_audios`, where
+(Optional, you can add your own audios in here.) Prepare speech [data](https://www.openslr.org/31/) in `path_to_minilibrispeech_audios`, where
 
 ```
 <path_to_minilibrispeech_audios>
